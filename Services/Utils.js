@@ -23,57 +23,57 @@ export const verifyToken = (token) => {
 };
 
 export const pick = (object, keys) => {
-    return keys.reduce((obj, key) => {
-      if (object && Object.prototype.hasOwnProperty.call(object, key)) {
-        obj[key] = object[key];
-      }
-      return obj;
-    }, {});
+  return keys.reduce((obj, key) => {
+    if (object && Object.prototype.hasOwnProperty.call(object, key)) {
+      obj[key] = object[key];
+    }
+    return obj;
+  }, {});
 };
 
 export const getFieldFromQueryParam = (queryParam) => {
-  return queryParam.replace('Contains', '');
+  return queryParam.replace("Contains", "");
 };
 
 export const parseQueryParam = (value) => {
-  if (!isNaN(value) && value !== '') {
+  if (!isNaN(value) && value !== "") {
     return Number(value);
   }
-  if (value.toLowerCase() === 'true') return true;
-  if (value.toLowerCase() === 'false') return false;
+  if (value.toLowerCase() === "true") return true;
+  if (value.toLowerCase() === "false") return false;
   return value;
 };
 
 export const queryGen = async (query) => {
-    const queryCopy = { ...query };
-    const skip = queryCopy.skip;
-    const limit = queryCopy.limit;
-    delete queryCopy.skip;
-    delete queryCopy.limit;
-    
-    let keywords = {};
-    Object.keys(queryCopy).forEach((queryParam) => {
-      if (queryCopy[queryParam]) {
-        const field = getFieldFromQueryParam(queryParam);
-        const regexSearch = new RegExp(queryCopy[queryParam], "i");
-  
-        if (field) {
-          if (queryParam.endsWith("Contains")) {
-            keywords.$or = keywords.$or || [];
-            keywords.$or.push({ [field]: { $regex: regexSearch } });
-          } else {
-            keywords[field] = parseQueryParam(queryCopy[queryParam]);
-          }
+  const queryCopy = { ...query };
+  const skip = queryCopy.skip;
+  const limit = queryCopy.limit;
+  delete queryCopy.skip;
+  delete queryCopy.limit;
+
+  let keywords = {};
+  Object.keys(queryCopy).forEach((queryParam) => {
+    if (queryCopy[queryParam]) {
+      const field = getFieldFromQueryParam(queryParam);
+      const regexSearch = new RegExp(queryCopy[queryParam], "i");
+
+      if (field) {
+        if (queryParam.endsWith("Contains")) {
+          keywords.$or = keywords.$or || [];
+          keywords.$or.push({ [field]: { $regex: regexSearch } });
+        } else {
+          keywords[field] = parseQueryParam(queryCopy[queryParam]);
         }
       }
-    });
-    
-    return { keywords, skip, limit };
-  };
+    }
+  });
+
+  return { keywords, skip, limit };
+};
 export const withTransaction = async (callback) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-  
+
   try {
     const result = await callback(session);
     await session.commitTransaction();
