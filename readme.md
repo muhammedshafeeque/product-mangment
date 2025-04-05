@@ -17,6 +17,7 @@ SALT_ROUNDS=10
 ## start
 
 npm i 
+
 npm start 
 
 
